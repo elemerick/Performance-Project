@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Timers;
 using CarvedRock.Data.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,8 @@ namespace CarvedRock.Data
 
                 var resultsByte = _distributedCache.Get(cacheKey);
                 if (resultsByte == null) {
+                    var timer = new Stopwatch();
+                    timer.Start();
                     Thread.Sleep(5000);
                     var productsToSerialize = await _ctx.Products
                         .Where(p => p.Category == category || category == "all")
@@ -68,6 +71,8 @@ namespace CarvedRock.Data
                         {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
                         });
+                    timer.Stop();
+                    _logger.LogInformation("Database caching took {ElapsedMs}", timer.ElapsedMilliseconds);
                     return productsToSerialize;
                 } else
                 {

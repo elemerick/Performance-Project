@@ -4,6 +4,7 @@ using CarvedRock.WebApp;
 using Serilog;
 using Serilog.Exceptions;
 using Serilog.Enrichers.Span;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -11,10 +12,12 @@ builder.Logging.ClearProviders();
 builder.Host.UseSerilog((context, loggerConfig) => { 
     loggerConfig
     .ReadFrom.Configuration(context.Configuration)
+    .Enrich.WithProperty("Application", Assembly.GetExecutingAssembly().GetName().Name ?? "API")
     .Enrich.WithExceptionDetails()
     .Enrich.FromLogContext()
     .Enrich.With<ActivityEnricher>()
     .WriteTo.Console()
+    .WriteTo.Seq("http://localhost:5341")
     .WriteTo.Debug();
 });
 
@@ -57,6 +60,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseMiddleware<UserScopeMiddleware>();
+app.UseSerilogRequestLogging();
 app.UseAuthorization();
 app.MapRazorPages().RequireAuthorization();
 

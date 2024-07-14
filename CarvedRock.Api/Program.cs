@@ -10,6 +10,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Exceptions;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -17,10 +18,11 @@ builder.Logging.ClearProviders();
 builder.Host.UseSerilog((context, loggerConfig) => {
     loggerConfig
     .ReadFrom.Configuration(context.Configuration)
-    .Enrich.WithExceptionDetails()
+    .Enrich.WithProperty("Application", Assembly.GetExecutingAssembly().GetName().Name ?? "API")
     .Enrich.FromLogContext()
     .Enrich.With<ActivityEnricher>()
     .WriteTo.Console()
+    .WriteTo.Seq("http://localhost:5341")
     .WriteTo.Debug();
 });
 
@@ -91,6 +93,7 @@ if (app.Environment.IsDevelopment())
 app.MapFallback(() => Results.Redirect("/swagger"));
 app.UseAuthentication();
 app.UseMiddleware<UserScopeMiddleware>();
+app.UseSerilogRequestLogging();
 app.UseAuthorization();
 app.MapControllers().RequireAuthorization();
 
