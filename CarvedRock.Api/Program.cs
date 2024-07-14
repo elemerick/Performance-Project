@@ -61,7 +61,11 @@ builder.Services.AddDbContext<LocalContext>();
 builder.Services.AddScoped<ICarvedRockRepository, CarvedRockRepository>();
 
 builder.Services.AddMemoryCache();
-
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.InstanceName = "CarvedRocks";
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

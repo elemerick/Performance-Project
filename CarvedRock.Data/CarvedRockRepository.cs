@@ -32,7 +32,7 @@ namespace CarvedRock.Data
         public async Task<List<Product>> GetProductsAsync(string category)
         {            
             _logger.LogInformation("Getting products in repository for {category}", category);
-            if (category == "clothing")
+            /*if (category == "clothing")
             {
                 var ex = new ApplicationException("Database error occurred!!");
                 ex.Data.Add("Category", category);
@@ -41,7 +41,7 @@ namespace CarvedRock.Data
             if (category == "equip")
             {
                 throw new SqliteException("Simulated fatal database error occurred!", 551);
-            }
+            }*/
 
             try
             {
