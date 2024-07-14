@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using CarvedRock.Data.Entities;
 using Microsoft.Data.Sqlite;
@@ -55,16 +56,23 @@ namespace CarvedRock.Data
                 var resultsByte = _distributedCache.Get(cacheKey);
                 if (resultsByte == null) {
                     Thread.Sleep(5000);
-                    var results = await _ctx.Products.Where(p => p.Category == category || category == "all").ToListAsync();
-                    _distributedCache.Set(cacheKey, JsonSerializer.SerializeToUtf8Bytes(results),
+                    var productsToSerialize = await _ctx.Products
+                        .Where(p => p.Category == category || category == "all")
+                        .Include(p => p.Rating).ToListAsync();
+
+                    var serializedProducts = JsonSerializer.Serialize(productsToSerialize, 
+                        CacheSourceGenerationContext.Default.ListProduct);
+
+                    _distributedCache.Set(cacheKey, Encoding.UTF8.GetBytes(serializedProducts),
                         new DistributedCacheEntryOptions
                         {
                             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
                         });
-                    return results;
+                    return productsToSerialize;
                 } else
                 {
-                    var results = JsonSerializer.Deserialize<List<Product>>(resultsByte);
+                    var results = JsonSerializer.Deserialize(Encoding.UTF8.GetString(resultsByte),
+                        CacheSourceGenerationContext.Default.ListProduct);
                     return results ?? new List<Product>();
                 }
 

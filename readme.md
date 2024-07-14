@@ -1,8 +1,11 @@
 # ASP.NET Core 6 Performance
 
-This is the repository with the code associated with an upcoming Pluralsight course called "ASP.NET Core 6 Performance".
-
-Repo URL: [https://github.com/dahlsailrunner/aspnet6-performance](https://github.com/dahlsailrunner/aspnet6-performance)
+In this project, we try to make use of the various tools ASP.NET Core provide to build a Highly performant app. we start by using `System.Text.Json` to replace the 
+well known `NewtownSoft.Json`, later on we implemented the following
+1. Memory Caching
+1. Distributed Caching with Redis
+1. Asynchronous programming with `async` and `await` directives
+1. Benchmarking to assess the overall performance of the project
 
 ## VS Code Setup
 
